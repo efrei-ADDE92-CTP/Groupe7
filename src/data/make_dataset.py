@@ -11,3 +11,7 @@ def load_iris_dataset():
     df['target'] = iris.target
     df['target_names'] = df.target.apply(lambda x: iris.target_names[x])
     return df
+
+def translate_predictions(predictions):
+    iris = load_iris()
+    return [iris.target_names[p] for p in predictions]
