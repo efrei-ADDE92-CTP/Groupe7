@@ -2,9 +2,11 @@
 from flask import Flask, request, jsonify
 import joblib
 import numpy as np
+import warnings
+warnings.filterwarnings('ignore')
 
 def load_model():
-    return joblib.load('../../models/knn.joblib')
+    return joblib.load('models/knn.joblib')
 
 def predict_model(model, data):
     return model.predict(data)[0]
@@ -27,5 +29,5 @@ def predict():
     # return response
     return jsonify({'prediction': prediction})
 
-
-
+if __name__ == "__main__":
+       app.run(host='0.0.0.0',debug=True,port=8081)
