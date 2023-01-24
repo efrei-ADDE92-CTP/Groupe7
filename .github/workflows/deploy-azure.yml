@@ -1,34 +1,29 @@
-name: Deploy to ACR
+name: Docker
 
-on:
-  push:
+push:
     branches:
       - main
 
 jobs:
-  deploy:
+  build:
+    name: Build container image
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Build Docker image
-      uses: actions/docker/build@v2
-      with:
-        context: .
-        push: true
-
-    - name: Login to Azure
-      uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}.azurecr.io
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-
-    - name: Publish image to ACR
-      uses: docker/build-push-action@v2
-       with:
-        context: .
-        push: true
-        tags: ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.0.1
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+      - name: Log into registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build & Push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          build-args: |
+            version=0.1
+          tags: ${{ secrets.ACR_ENDPOINT }}/groupe7:0.1
