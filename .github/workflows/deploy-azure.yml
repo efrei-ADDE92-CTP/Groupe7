@@ -23,5 +23,5 @@ jobs:
 
       - name: Push Docker image to Azure Container Registry
         run: |
-            docker tag mydemoapp:latest ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1
-            docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/mydemoapp:${{ github.sha }} 
+            docker build . -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1
+            docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1 
