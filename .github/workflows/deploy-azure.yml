@@ -1,27 +1,84 @@
-name: Push to Azure Container Registry
+# name: Push to Azure Container Registry
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   push-to-azure-container-registry:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@main
+
+#       - name: Login to Azure Container Registry
+#         uses: azure/docker-login@v1
+#         with:
+#           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}.azurecr.io
+#           username: ${{ secrets.REGISTRY_USERNAME }}
+#           password: ${{ secrets.REGISTRY_PASSWORD }}
+
+#       - name: Build Docker image
+#         run: docker-compose build
+
+#       - name: Push Docker image to Azure Container Registry
+#         run: |
+#             docker build . -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1
+#             docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1 
+
+# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+name: CI
+
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - master
+      - main
 
 jobs:
-  push-to-azure-container-registry:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@main
+      - uses: actions/checkout@v2
 
-      - name: Login to Azure Container Registry
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}.azurecr.io
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build Docker image
-        run: docker-compose build
-
-      - name: Push Docker image to Azure Container Registry
+      - name: Build and push image
         run: |
-            docker build . -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1
-            docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1 
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/groupe7:0.1
+          az acr build --registry ${{ secrets.REGISTRY_LOGIN_SERVER }} --image groupe7:0.1 .
+
+      - name: Build and deploy Container App
+        uses: azure/container-apps-deploy-action@v0
+        with:
+          containerAppName: containerApp-grp7
+          resourceGroup: ${{ secrets.RESOURCE_GROUP }}
+          imageToDeploy: ${{ secrets.REGISTRY_LOGIN_SERVER }}/groupe7:0.1
+          containerAppEnvironment: containerAppEnv-grp7
+
+      - name: Configure Autoscaling
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az containerapp update \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --name container-grp8 \
+            --min-replicas 0 \
+            --max-replicas 5 \
+            --scale-rule-name azure-http-rule \
+            --scale-rule-type http \
+            --scale-rule-http-concurrency 100
