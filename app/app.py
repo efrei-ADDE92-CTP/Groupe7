@@ -4,6 +4,8 @@ import joblib
 import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
+from prometheus_flask_exporter import PrometheusMetrics
+import logging
 
 def load_model():
     return joblib.load('knn.joblib')
@@ -19,8 +21,16 @@ def predict_from_json(model, json_data):
 app = Flask(__name__)
 model = load_model()
 
+metrics = PrometheusMetrics(app, group_by='endpoint')
+
+by_path_counter = metrics.counter(
+    'by_path_counter', 'Request count by request paths',
+    labels={'path': lambda: request.path}
+)
+
 # predict endpoint
 @app.route('/predict', methods=['POST'])
+@by_path_counter
 def predict():
     # get data from request
     data = request.get_json()
@@ -30,4 +40,4 @@ def predict():
     return jsonify({'prediction': prediction})
 
 if __name__ == "__main__":
-       app.run(host='0.0.0.0',debug=True,port=5000)
+       app.run(host='0.0.0.0', threaded=True,port=5000)
