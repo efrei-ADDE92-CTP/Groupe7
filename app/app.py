@@ -21,16 +21,17 @@ def predict_from_json(model, json_data):
 app = Flask(__name__)
 model = load_model()
 
-metrics = PrometheusMetrics(app, group_by='endpoint')
+metrics = PrometheusMetrics(app)
 
-by_path_counter = metrics.counter(
-    'by_path_counter', 'Request count by request paths',
-    labels={'path': lambda: request.path}
+# Apply the same metric to all of the endpoints
+endpoint_counter = metrics.counter(
+    'Response counter', 'Request count by endpoints',
+    labels={'Response': lambda: request.endpoint}
 )
 
 # predict endpoint
 @app.route('/predict', methods=['POST'])
-@by_path_counter
+@endpoint_counter
 def predict():
     # get data from request
     data = request.get_json()
@@ -38,6 +39,8 @@ def predict():
     prediction = predict_from_json(model, data)
     # return response
     return jsonify({'prediction': prediction})
+
+
 
 if __name__ == "__main__":
        app.run(host='0.0.0.0', threaded=True,port=5000)
