@@ -23,15 +23,14 @@ model = load_model()
 
 metrics = PrometheusMetrics(app)
 
-# Apply the same metric to all of the endpoints
-endpoint_counter = metrics.counter(
-    'Response counter', 'Request count by endpoints',
-    labels={'Response': lambda: request.endpoint}
-)
+# # Apply the same metric to all of the endpoints
+# endpoint_counter = metrics.counter(
+#     'Response counter', 'Request count by endpoints',
+#     labels={'Response': lambda: request.res}
+# )
 
 # predict endpoint
 @app.route('/predict', methods=['POST'])
-@endpoint_counter
 def predict():
     # get data from request
     data = request.get_json()

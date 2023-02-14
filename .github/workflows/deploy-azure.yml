@@ -1,33 +1,3 @@
-# name: Push to Azure Container Registry
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   push-to-azure-container-registry:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@main
-
-#       - name: Login to Azure Container Registry
-#         uses: azure/docker-login@v1
-#         with:
-#           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}.azurecr.io
-#           username: ${{ secrets.REGISTRY_USERNAME }}
-#           password: ${{ secrets.REGISTRY_PASSWORD }}
-
-#       - name: Build Docker image
-#         run: docker-compose build
-
-#       - name: Push Docker image to Azure Container Registry
-#         run: |
-#             docker build . -t ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1
-#             docker push ${{ secrets.REGISTRY_USERNAME }}.azurecr.io/groupe7:0.1 
-
-# ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 name: CI
 
 on:
@@ -53,7 +23,7 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build and push image
+      - name: Build the stack
         run: |
           docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/groupe7:0.1
           az acr build --registry ${{ secrets.REGISTRY_LOGIN_SERVER }} --image groupe7:0.1 .
