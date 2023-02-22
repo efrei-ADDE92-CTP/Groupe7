@@ -31,6 +31,8 @@ metrics = PrometheusMetrics(app)
 
 # predict endpoint
 @app.route('/predict', methods=['POST'])
+@metrics.histogram('requests_by_status_and_path', 'Request latencies by status and path',
+                   labels={'status': lambda r: r.status_code, 'path': lambda: request.path})
 def predict():
     # get data from request
     data = request.get_json()

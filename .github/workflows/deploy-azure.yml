@@ -44,7 +44,7 @@ jobs:
           inlineScript: |
             az containerapp update \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            --name container-grp8 \
+            --name grp7containerapp \
             --min-replicas 0 \
             --max-replicas 5 \
             --scale-rule-name azure-http-rule \
