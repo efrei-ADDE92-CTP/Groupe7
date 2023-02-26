@@ -5,7 +5,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 from prometheus_flask_exporter import PrometheusMetrics
-import logging
+
 
 def load_model():
     return joblib.load('knn.joblib')
@@ -23,12 +23,6 @@ model = load_model()
 
 metrics = PrometheusMetrics(app)
 
-# # Apply the same metric to all of the endpoints
-# endpoint_counter = metrics.counter(
-#     'Response counter', 'Request count by endpoints',
-#     labels={'Response': lambda: request.res}
-# )
-
 # predict endpoint
 @app.route('/predict', methods=['POST'])
 @metrics.histogram('requests_by_status_and_path', 'Request latencies by status and path',
@@ -40,7 +34,6 @@ def predict():
     prediction = predict_from_json(model, data)
     # return response
     return jsonify({'prediction': prediction})
-
 
 
 if __name__ == "__main__":
