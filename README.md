@@ -2,7 +2,7 @@
 
 To start the project, you need to have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed.
 
-Then, you need to create a `.env` file in the root of the project, with the following content:
+Then start the containers with:
 
 ```shell
 
